@@ -1,9 +1,9 @@
-# Hermes Paperclip Adapter — Development Guide
+# Hermes RazielTeams Adapter — Development Guide
 
 ## Overview
 
-This is a Paperclip adapter that runs Hermes Agent as a managed employee.
-It implements the `ServerAdapterModule` interface from `@paperclipai/adapter-utils`.
+This is a RazielTeams adapter that runs Hermes Agent as a managed employee.
+It implements the `ServerAdapterModule` interface from `@raziel-teams/adapter-utils`.
 
 ## Structure
 
@@ -40,10 +40,10 @@ npm run build     # tsc → dist/
 npm run typecheck # type checking only
 ```
 
-## Testing against a local Paperclip instance
+## Testing against a local RazielTeams instance
 
 1. Build this adapter: `npm run build`
-2. In your Paperclip repo, add this as a local dependency
+2. In your RazielTeams repo, add this as a local dependency
 3. Register in `server/src/adapters/registry.ts`
 4. Create an agent with `adapterType: "hermes_local"`
 5. Trigger a heartbeat and observe logs
