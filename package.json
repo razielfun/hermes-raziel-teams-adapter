@@ -1,16 +1,16 @@
 {
-  "name": "hermes-paperclip-adapter",
-  "version": "0.3.0",
-  "description": "Paperclip adapter for Hermes Agent — run Hermes as a managed employee in a Paperclip company",
+  "name": "hermes-raziel-teams-adapter",
+  "version": "0.1.0",
+  "description": "RazielTeams adapter for Hermes Agent — run Hermes as a managed employee in a RazielTeams company",
   "type": "module",
   "license": "MIT",
   "author": "Nous Research",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NousResearch/hermes-paperclip-adapter"
+    "url": "https://github.com/razielfun/hermes-raziel-teams-adapter"
   },
   "keywords": [
-    "paperclip",
+    "raziel-teams",
     "hermes",
     "hermes-agent",
     "ai-agent",
@@ -18,10 +18,21 @@
     "orchestration"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./server": "./dist/server/index.js",
-    "./ui": "./dist/ui/index.js",
-    "./cli": "./dist/cli/index.js"
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts",
+    "./ui": "./src/ui/index.ts",
+    "./cli": "./src/cli/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+      "./server": { "types": "./dist/server/index.d.ts", "import": "./dist/server/index.js" },
+      "./ui": { "types": "./dist/ui/index.d.ts", "import": "./dist/ui/index.js" },
+      "./cli": { "types": "./dist/cli/index.d.ts", "import": "./dist/cli/index.js" }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
   },
   "files": [
     "dist"
@@ -34,7 +45,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@paperclipai/adapter-utils": "^2026.325.0",
+    "@raziel-teams/adapter-utils": "^0.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {

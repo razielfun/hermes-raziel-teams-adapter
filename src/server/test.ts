@@ -9,7 +9,7 @@ import type {
   AdapterEnvironmentTestContext,
   AdapterEnvironmentTestResult,
   AdapterEnvironmentCheck,
-} from "@paperclipai/adapter-utils";
+} from "@raziel-teams/adapter-utils";
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -119,7 +119,7 @@ function checkModel(
     return {
       level: "info",
       message: "No model specified — Hermes will use its configured default model",
-      hint: "Set a model explicitly in Paperclip only if you want to override your local Hermes configuration.",
+      hint: "Set a model explicitly in RazielTeams only if you want to override your local Hermes configuration.",
       code: "hermes_configured_default_model",
     };
   }

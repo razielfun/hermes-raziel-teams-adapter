@@ -11,7 +11,7 @@ export {
   resolveHermesDesiredSkillNames as resolveDesiredSkillNames,
 } from "./skills.js";
 
-import type { AdapterSessionCodec } from "@paperclipai/adapter-utils";
+import type { AdapterSessionCodec } from "@raziel-teams/adapter-utils";
 
 function readNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;

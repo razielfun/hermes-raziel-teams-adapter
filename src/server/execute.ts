@@ -2,7 +2,7 @@
  * Server-side execution logic for the Hermes Agent adapter.
  *
  * Spawns `hermes chat -q "..." -Q` as a child process, streams output,
- * and returns structured results to Paperclip.
+ * and returns structured results to RazielTeams.
  *
  * Verified CLI flags (hermes chat):
  *   -q/--query         single query (non-interactive)
@@ -22,14 +22,14 @@ import type {
   AdapterExecutionContext,
   AdapterExecutionResult,
   UsageSummary,
-} from "@paperclipai/adapter-utils";
+} from "@raziel-teams/adapter-utils";
 
 import {
   runChildProcess,
-  buildPaperclipEnv,
+  buildRazielTeamsEnv,
   renderTemplate,
   ensureAbsoluteDirectory,
-} from "@paperclipai/adapter-utils/server-utils";
+} from "@raziel-teams/adapter-utils/server-utils";
 
 import {
   HERMES_CLI,
@@ -67,14 +67,14 @@ function cfgStringArray(v: unknown): string[] | undefined {
 // Wake-up prompt builder
 // ---------------------------------------------------------------------------
 
-const DEFAULT_PROMPT_TEMPLATE = `You are "{{agentName}}", an AI agent employee in a Paperclip-managed company.
+const DEFAULT_PROMPT_TEMPLATE = `You are "{{agentName}}", an AI agent employee in a RazielTeams-managed company.
 
-IMPORTANT: Use \`terminal\` tool with \`curl\` for ALL Paperclip API calls (web_extract and browser cannot access localhost).
+IMPORTANT: Use \`terminal\` tool with \`curl\` for ALL RazielTeams API calls (web_extract and browser cannot access localhost).
 
-Your Paperclip identity:
+Your RazielTeams identity:
   Agent ID: {{agentId}}
   Company ID: {{companyId}}
-  API Base: {{paperclipApiUrl}}
+  API Base: {{razielTeamsApiUrl}}
 
 {{#taskId}}
 ## Assigned Task
@@ -88,18 +88,18 @@ Title: {{taskTitle}}
 
 1. Work on the task using your tools
 2. When done, mark the issue as completed:
-   \`curl -s -X PATCH -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/{{taskId}}" -H "Content-Type: application/json" -d '{"status":"done"}'\`
+   \`curl -s -X PATCH -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/{{taskId}}" -H "Content-Type: application/json" -d '{"status":"done"}'\`
 3. Post a completion comment on the issue summarizing what you did:
-   \`curl -s -X POST -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/{{taskId}}/comments" -H "Content-Type: application/json" -d '{"body":"DONE: <your summary here>"}'\`
+   \`curl -s -X POST -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/{{taskId}}/comments" -H "Content-Type: application/json" -d '{"body":"DONE: <your summary here>"}'\`
 4. If this issue has a parent (check the issue body or comments for references like TRA-XX), post a brief notification on the parent issue so the parent owner knows:
-   \`curl -s -X POST -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/PARENT_ISSUE_ID/comments" -H "Content-Type: application/json" -d '{"body":"{{agentName}} completed {{taskId}}. Summary: <brief>"}'\`
+   \`curl -s -X POST -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/PARENT_ISSUE_ID/comments" -H "Content-Type: application/json" -d '{"body":"{{agentName}} completed {{taskId}}. Summary: <brief>"}'\`
 {{/taskId}}
 
 {{#commentId}}
 ## Comment on This Issue
 
 Someone commented. Read it:
-   \`curl -s -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/{{taskId}}/comments/{{commentId}}" | python3 -m json.tool\`
+   \`curl -s -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/{{taskId}}/comments/{{commentId}}" | python3 -m json.tool\`
 
 Address the comment, POST a reply if needed, then continue working.
 {{/commentId}}
@@ -108,17 +108,17 @@ Address the comment, POST a reply if needed, then continue working.
 ## Heartbeat Wake — Check for Work
 
 1. List ALL open issues assigned to you (todo, backlog, in_progress):
-   \`curl -s -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/companies/{{companyId}}/issues?assigneeAgentId={{agentId}}" | python3 -c "import sys,json;issues=json.loads(sys.stdin.read());[print(f'{i[\"identifier\"]} {i[\"status\"]:>12} {i[\"priority\"]:>6} {i[\"title\"]}') for i in issues if i['status'] not in ('done','cancelled')]" \`
+   \`curl -s -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/companies/{{companyId}}/issues?assigneeAgentId={{agentId}}" | python3 -c "import sys,json;issues=json.loads(sys.stdin.read());[print(f'{i[\"identifier\"]} {i[\"status\"]:>12} {i[\"priority\"]:>6} {i[\"title\"]}') for i in issues if i['status'] not in ('done','cancelled')]" \`
 
 2. If issues found, pick the highest priority one that is not done/cancelled and work on it:
-   - Read the issue details: \`curl -s -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/ISSUE_ID"\`
+   - Read the issue details: \`curl -s -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/ISSUE_ID"\`
    - Do the work in the project directory: {{projectName}}
    - When done, mark complete and post a comment (see Workflow steps 2-4 above)
 
 3. If no issues assigned to you, check for unassigned issues:
-   \`curl -s -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/companies/{{companyId}}/issues?status=backlog" | python3 -c "import sys,json;issues=json.loads(sys.stdin.read());[print(f'{i[\"identifier\"]} {i[\"title\"]}') for i in issues if not i.get('assigneeAgentId')]" \`
+   \`curl -s -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/companies/{{companyId}}/issues?status=backlog" | python3 -c "import sys,json;issues=json.loads(sys.stdin.read());[print(f'{i[\"identifier\"]} {i[\"title\"]}') for i in issues if not i.get('assigneeAgentId')]" \`
    If you find a relevant issue, assign it to yourself:
-   \`curl -s -X PATCH -H "Authorization: Bearer $PAPERCLIP_API_KEY" "{{paperclipApiUrl}}/issues/ISSUE_ID" -H "Content-Type: application/json" -d '{"assigneeAgentId":"{{agentId}}","status":"todo"}'\`
+   \`curl -s -X PATCH -H "Authorization: Bearer $RAZIEL_TEAMS_API_KEY" "{{razielTeamsApiUrl}}/issues/ISSUE_ID" -H "Content-Type: application/json" -d '{"assigneeAgentId":"{{agentId}}","status":"todo"}'\`
 
 4. If truly nothing to do, report briefly what you checked.
 {{/noTask}}`;
@@ -139,13 +139,13 @@ function buildPrompt(
   const projectName = cfgString(ctx.config?.projectName) || "";
 
   // Build API URL — ensure it has the /api path
-  let paperclipApiUrl =
-    cfgString(config.paperclipApiUrl) ||
-    process.env.PAPERCLIP_API_URL ||
+  let razielTeamsApiUrl =
+    cfgString(config.razielTeamsApiUrl) ||
+    process.env.RAZIEL_TEAMS_API_URL ||
     "http://127.0.0.1:3100/api";
   // Ensure /api suffix
-  if (!paperclipApiUrl.endsWith("/api")) {
-    paperclipApiUrl = paperclipApiUrl.replace(/\/+$/, "") + "/api";
+  if (!razielTeamsApiUrl.endsWith("/api")) {
+    razielTeamsApiUrl = razielTeamsApiUrl.replace(/\/+$/, "") + "/api";
   }
 
   const vars: Record<string, unknown> = {
@@ -160,7 +160,7 @@ function buildPrompt(
     commentId,
     wakeReason,
     projectName,
-    paperclipApiUrl,
+    razielTeamsApiUrl,
   };
 
   // Handle conditional sections: {{#key}}...{{/key}}
@@ -224,7 +224,7 @@ function cleanResponse(raw: string): string {
     .filter((line) => {
       const t = line.trim();
       if (!t) return true; // keep blank lines for paragraph separation
-      if (t.startsWith("[tool]") || t.startsWith("[hermes]") || t.startsWith("[paperclip]")) return false;
+      if (t.startsWith("[tool]") || t.startsWith("[hermes]") || t.startsWith("[raziel-teams]")) return false;
       if (t.startsWith("session_id:")) return false;
       if (/^\[\d{4}-\d{2}-\d{2}T/.test(t)) return false;
       if (/^\[done\]\s*┊/.test(t)) return false;
@@ -390,7 +390,7 @@ export async function execute(
   args.push("--source", "tool");
 
   // Bypass Hermes dangerous-command approval prompts.
-  // Paperclip agents run as non-interactive subprocesses with no TTY,
+  // RazielTeams agents run as non-interactive subprocesses with no TTY,
   // so approval prompts would always timeout and deny legitimate commands
   // (curl, python3 -c, etc.). Agents operate in a sandbox — the approval
   // system is designed for human-attended interactive sessions.
@@ -411,14 +411,14 @@ export async function execute(
   // ── Build environment ──────────────────────────────────────────────────
   const env: Record<string, string> = {
     ...(process.env as Record<string, string>),
-    ...buildPaperclipEnv(ctx.agent),
+    ...buildRazielTeamsEnv(ctx.agent),
   };
 
-  if (ctx.runId) env.PAPERCLIP_RUN_ID = ctx.runId;
-  if ((ctx as any).authToken && !env.PAPERCLIP_API_KEY)
-    env.PAPERCLIP_API_KEY = (ctx as any).authToken;
+  if (ctx.runId) env.RAZIEL_TEAMS_RUN_ID = ctx.runId;
+  if ((ctx as any).authToken && !env.RAZIEL_TEAMS_API_KEY)
+    env.RAZIEL_TEAMS_API_KEY = (ctx as any).authToken;
   const taskId = cfgString(ctx.config?.taskId);
-  if (taskId) env.PAPERCLIP_TASK_ID = taskId;
+  if (taskId) env.RAZIEL_TEAMS_TASK_ID = taskId;
 
   const userEnv = config.env as Record<string, string> | undefined;
   if (userEnv && typeof userEnv === "object") {
@@ -448,7 +448,7 @@ export async function execute(
 
   // ── Execute ────────────────────────────────────────────────────────────
   // Hermes writes non-error noise to stderr (MCP init, INFO logs, etc).
-  // Paperclip renders all stderr as red/error in the UI.
+  // RazielTeams renders all stderr as red/error in the UI.
   // Wrap onLog to reclassify benign stderr lines as stdout.
   const wrappedOnLog = async (stream: "stdout" | "stderr", chunk: string) => {
     if (stream === "stderr") {
@@ -515,7 +515,7 @@ export async function execute(
     executionResult.summary = parsed.response.slice(0, 2000);
   }
 
-  // Set resultJson so Paperclip can persist run metadata (used for UI display + auto-comments)
+  // Set resultJson so RazielTeams can persist run metadata (used for UI display + auto-comments)
   executionResult.resultJson = {
     result: parsed.response || "",
     session_id: parsed.sessionId || null,

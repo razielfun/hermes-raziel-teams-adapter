@@ -2,10 +2,10 @@
  * Shared constants for the Hermes Agent adapter.
  */
 
-/** Adapter type identifier registered with Paperclip. */
+/** Adapter type identifier registered with RazielTeams. */
 export const ADAPTER_TYPE = "hermes_local";
 
-/** Human-readable label shown in the Paperclip UI. */
+/** Human-readable label shown in the RazielTeams UI. */
 export const ADAPTER_LABEL = "Hermes Agent";
 
 /** Default CLI binary name. */

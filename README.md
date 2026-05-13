@@ -1,6 +1,6 @@
-# Paperclip Adapter for Hermes Agent
+# RazielTeams Adapter for Hermes Agent
 
-A [Paperclip](https://paperclip.ing) adapter that lets you run [Hermes Agent](https://github.com/NousResearch/hermes-agent) as a managed employee in a Paperclip company.
+A [RazielTeams](https://raziel-teams.ing) adapter that lets you run [Hermes Agent](https://github.com/NousResearch/hermes-agent) as a managed employee in a RazielTeams company.
 
 Hermes Agent is a full-featured AI agent by [Nous Research](https://nousresearch.com) with 30+ native tools, persistent memory, session persistence, 80+ skills, MCP support, and multi-provider model access.
 
@@ -9,8 +9,8 @@ Hermes Agent is a full-featured AI agent by [Nous Research](https://nousresearch
 This adapter provides:
 
 - **8 inference providers** — Anthropic, OpenRouter, OpenAI, Nous, OpenAI Codex, ZAI, Kimi Coding, MiniMax
-- **Skills integration** — Scans both Paperclip-managed and Hermes-native skills (`~/.hermes/skills/`), with sync/list/resolve APIs
-- **Structured transcript parsing** — Raw Hermes stdout is parsed into typed `TranscriptEntry` objects so Paperclip renders proper tool cards with status icons and expand/collapse
+- **Skills integration** — Scans both RazielTeams-managed and Hermes-native skills (`~/.hermes/skills/`), with sync/list/resolve APIs
+- **Structured transcript parsing** — Raw Hermes stdout is parsed into typed `TranscriptEntry` objects so RazielTeams renders proper tool cards with status icons and expand/collapse
 - **Rich post-processing** — Converts Hermes ASCII banners, setext headings, and `+--+` table borders into clean GFM markdown
 - **Comment-driven wakes** — Agents wake to respond to issue comments, not just task assignments
 - **Auto model detection** — Reads `~/.hermes/config.yaml` to pre-populate the UI with the user's configured model
@@ -36,7 +36,7 @@ This adapter provides:
 ## Installation
 
 ```bash
-npm install hermes-paperclip-adapter
+npm install hermes-raziel-teams-adapter
 ```
 
 ### Prerequisites
@@ -47,12 +47,12 @@ npm install hermes-paperclip-adapter
 
 ## Quick Start
 
-### 1. Register the adapter in your Paperclip server
+### 1. Register the adapter in your RazielTeams server
 
-Add to your Paperclip server's adapter registry (`server/src/adapters/registry.ts`):
+Add to your RazielTeams server's adapter registry (`server/src/adapters/registry.ts`):
 
 ```typescript
-import * as hermesLocal from "hermes-paperclip-adapter";
+import * as hermesLocal from "hermes-raziel-teams-adapter";
 import {
   execute,
   testEnvironment,
@@ -60,7 +60,7 @@ import {
   listSkills,
   syncSkills,
   sessionCodec,
-} from "hermes-paperclip-adapter/server";
+} from "hermes-raziel-teams-adapter/server";
 
 registry.set("hermes_local", {
   ...hermesLocal,
@@ -73,9 +73,9 @@ registry.set("hermes_local", {
 });
 ```
 
-### 2. Create a Hermes agent in Paperclip
+### 2. Create a Hermes agent in RazielTeams
 
-In the Paperclip UI or via API, create an agent with adapter type `hermes_local`:
+In the RazielTeams UI or via API, create an agent with adapter type `hermes_local`:
 
 ```json
 {
@@ -93,11 +93,11 @@ In the Paperclip UI or via API, create an agent with adapter type `hermes_local`
 
 ### 3. Assign work
 
-Create issues in Paperclip and assign them to your Hermes agent. On each heartbeat, Hermes will:
+Create issues in RazielTeams and assign them to your Hermes agent. On each heartbeat, Hermes will:
 
 1. Receive the task instructions
 2. Use its full tool suite to complete the work
-3. Report results back to Paperclip
+3. Report results back to RazielTeams
 4. Persist session state for continuity
 
 ## Configuration Reference
@@ -137,7 +137,7 @@ Available toolsets: `terminal`, `file`, `web`, `browser`, `code_execution`, `vis
 | `extraArgs` | string[] | `[]` | Additional CLI arguments |
 | `env` | object | `{}` | Extra environment variables |
 | `promptTemplate` | string | *(built-in)* | Custom prompt template |
-| `paperclipApiUrl` | string | `http://127.0.0.1:3100/api` | Paperclip API base URL |
+| `razielTeamsApiUrl` | string | `http://127.0.0.1:3100/api` | RazielTeams API base URL |
 
 ### Prompt Template Variables
 
@@ -145,7 +145,7 @@ Use `{{variable}}` syntax in `promptTemplate`:
 
 | Variable | Description |
 |----------|-------------|
-| `{{agentId}}` | Paperclip agent ID |
+| `{{agentId}}` | RazielTeams agent ID |
 | `{{agentName}}` | Agent display name |
 | `{{companyId}}` | Company ID |
 | `{{companyName}}` | Company name |
@@ -154,7 +154,7 @@ Use `{{variable}}` syntax in `promptTemplate`:
 | `{{taskTitle}}` | Task title |
 | `{{taskBody}}` | Task instructions |
 | `{{projectName}}` | Project name |
-| `{{paperclipApiUrl}}` | Paperclip API base URL |
+| `{{razielTeamsApiUrl}}` | RazielTeams API base URL |
 | `{{commentId}}` | Comment ID (when woken by a comment) |
 | `{{wakeReason}}` | Reason this run was triggered |
 
@@ -167,7 +167,7 @@ Conditional sections:
 ## Architecture
 
 ```
-Paperclip                          Hermes Agent
+RazielTeams                          Hermes Agent
 ┌──────────────────┐               ┌──────────────────┐
 │  Heartbeat       │               │                  │
 │  Scheduler       │───execute()──▶│  hermes chat -q  │
@@ -190,7 +190,7 @@ processes the task using its full tool suite, then exits. The adapter:
 3. **Post-processes** Hermes ASCII formatting (banners, setext headings, table borders) into clean GFM markdown
 4. **Reclassifies** benign stderr (MCP init, structured logs) so they don't show as errors
 5. **Tags** sessions as `tool` source to keep them separate from interactive usage
-6. **Reports** results back to Paperclip with cost, usage, and session state
+6. **Reports** results back to RazielTeams with cost, usage, and session state
 
 Session persistence works via Hermes's `--resume` flag — each run picks
 up where the last one left off, maintaining conversation context,
@@ -201,17 +201,17 @@ and migrates session state between runs.
 
 The adapter scans two skill sources and merges them:
 
-- **Paperclip-managed skills** — bundled with the adapter, togglable from the UI
+- **RazielTeams-managed skills** — bundled with the adapter, togglable from the UI
 - **Hermes-native skills** — from `~/.hermes/skills/`, read-only, always loaded
 
 The `listSkills` / `syncSkills` APIs expose a unified snapshot so the
-Paperclip UI can display both managed and native skills in one view.
+RazielTeams UI can display both managed and native skills in one view.
 
 ## Development
 
 ```bash
-git clone https://github.com/NousResearch/hermes-paperclip-adapter
-cd hermes-paperclip-adapter
+git clone https://github.com/razielfun/hermes-raziel-teams-adapter
+cd hermes-raziel-teams-adapter
 npm install
 npm run build
 ```
@@ -223,6 +223,6 @@ MIT — see [LICENSE](LICENSE)
 ## Links
 
 - [Hermes Agent](https://github.com/NousResearch/hermes-agent) — The AI agent this adapter runs
-- [Paperclip](https://github.com/paperclipai/paperclip) — The orchestration platform
+- [RazielTeams](https://github.com/razielfun/raziel-teams) — The orchestration platform
 - [Nous Research](https://nousresearch.com) — The team behind Hermes
-- [Paperclip Docs](https://paperclip.ing/docs) — Paperclip documentation
+- [RazielTeams Docs](https://raziel-teams.ing/docs) — RazielTeams documentation

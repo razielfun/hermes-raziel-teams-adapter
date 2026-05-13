@@ -1,8 +1,8 @@
 /**
- * Hermes Agent adapter for Paperclip.
+ * Hermes Agent adapter for RazielTeams.
  *
  * Runs Hermes Agent (https://github.com/NousResearch/hermes-agent)
- * as a managed employee in a Paperclip company. Hermes Agent is a
+ * as a managed employee in a RazielTeams company. Hermes Agent is a
  * full-featured AI agent with 30+ native tools, persistent memory,
  * skills, session persistence, and MCP support.
  *
@@ -17,14 +17,14 @@ export const label = ADAPTER_LABEL;
 /**
  * Models available through Hermes Agent.
  *
- * Hermes supports any model via any provider. The Paperclip UI should
+ * Hermes supports any model via any provider. The RazielTeams UI should
  * prefer detectModel() plus manual entry over curated placeholder models,
  * since Hermes availability depends on the user's local configuration.
  */
 export const models: { id: string; label: string }[] = [];
 
 /**
- * Documentation shown in the Paperclip UI when configuring a Hermes agent.
+ * Documentation shown in the RazielTeams UI when configuring a Hermes agent.
  */
 export const agentConfigurationDoc = `# Hermes Agent Configuration
 
@@ -72,9 +72,9 @@ tools, persistent memory, session persistence, skills, and MCP support.
 
 ## Available Template Variables
 
-- \`{{agentId}}\` — Paperclip agent ID
+- \`{{agentId}}\` — RazielTeams agent ID
 - \`{{agentName}}\` — Agent display name
-- \`{{companyId}}\` — Paperclip company ID
+- \`{{companyId}}\` — RazielTeams company ID
 - \`{{companyName}}\` — Company display name
 - \`{{runId}}\` — Current heartbeat run ID
 - \`{{taskId}}\` — Current task/issue ID (if assigned)

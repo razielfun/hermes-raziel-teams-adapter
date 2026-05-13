@@ -1,5 +1,5 @@
 /**
- * Parse Hermes Agent stdout into TranscriptEntry objects for the Paperclip UI.
+ * Parse Hermes Agent stdout into TranscriptEntry objects for the RazielTeams UI.
  *
  * Hermes CLI quiet-mode output patterns:
  *   Assistant:  "  ┊ 💬 {text}"
@@ -7,11 +7,11 @@
  *   Tool (pipe): "  [done] ┊ {emoji} {verb:9} {detail}  {duration} ({total})"
  *   System:     "[hermes] ..."
  *
- * We emit structured tool_call/tool_result pairs so Paperclip renders proper
+ * We emit structured tool_call/tool_result pairs so RazielTeams renders proper
  * tool cards (with status icons, expand/collapse) instead of raw stdout blocks.
  */
 
-import type { TranscriptEntry } from "@paperclipai/adapter-utils";
+import type { TranscriptEntry } from "@raziel-teams/adapter-utils";
 
 import { TOOL_OUTPUT_PREFIX } from "../shared/constants.js";
 
@@ -150,7 +150,7 @@ let toolCallCounter = 0;
 
 /**
  * Generate a synthetic toolUseId for pairing tool_call with tool_result.
- * Paperclip uses this to match them in normalizeTranscript.
+ * RazielTeams uses this to match them in normalizeTranscript.
  */
 function syntheticToolUseId(): string {
   return `hermes-tool-${++toolCallCounter}`;
@@ -173,7 +173,7 @@ function isThinkingLine(line: string): boolean {
  * Parse a single line of Hermes stdout into transcript entries.
  *
  * Emits structured tool_call/tool_result pairs (with synthetic IDs) so
- * Paperclip renders proper tool cards with status icons and expand/collapse.
+ * RazielTeams renders proper tool cards with status icons and expand/collapse.
  *
  * @param line  Raw stdout line from Hermes CLI
  * @param ts    ISO timestamp for the entry
@@ -187,7 +187,7 @@ export function parseHermesStdoutLine(
   if (!trimmed) return [];
 
   // ── System/adapter messages ────────────────────────────────────────────
-  if (trimmed.startsWith("[hermes]") || trimmed.startsWith("[paperclip]")) {
+  if (trimmed.startsWith("[hermes]") || trimmed.startsWith("[raziel-teams]")) {
     return [{ kind: "system", ts, text: trimmed }];
   }
 
@@ -200,7 +200,7 @@ export function parseHermesStdoutLine(
 
   // ── MCP / server init noise reclassified from stderr by wrappedOnLog ──
   // Pattern: [2026-03-25T10:40:53.941Z] INFO: ...
-  // Emit as stderr so Paperclip groups them into the amber accordion.
+  // Emit as stderr so RazielTeams groups them into the amber accordion.
   if (/^\[\d{4}-\d{2}-\d{2}T/.test(trimmed)) {
     return [{ kind: "stderr", ts, text: trimmed }];
   }
