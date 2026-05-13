@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@raziel-teams/adapter-utils':
-        specifier: file:../raziel-teams/packages/adapter-utils
-        version: file:../raziel-teams/packages/adapter-utils
+        specifier: ^0.1.0
+        version: 0.1.0
       picocolors:
         specifier: ^1.1.0
         version: 1.1.1
@@ -24,8 +24,8 @@ importers:
 
 packages:
 
-  '@raziel-teams/adapter-utils@file:../raziel-teams/packages/adapter-utils':
-    resolution: {directory: ../raziel-teams/packages/adapter-utils, type: directory}
+  '@raziel-teams/adapter-utils@0.1.0':
+    resolution: {integrity: sha512-uRIgoHymW6jnNCaMvmd6Owja7wsZZnCIJuqt8F7xasH829YZ9giFh4eXpoTAlIx8UKacZsH+Q/zWlGC9MS58Pw==}
 
   '@types/node@22.19.19':
     resolution: {integrity: sha512-dyh/xO2Fh5bYrfWaaqGrRQQGkNdmYw6AmaAUvYeUMNTWQtvb796ikLdmTchRmOlOiIJ1TDXfWgVx1QkUlQ6Hew==}
@@ -43,7 +43,7 @@ packages:
 
 snapshots:
 
-  '@raziel-teams/adapter-utils@file:../raziel-teams/packages/adapter-utils': {}
+  '@raziel-teams/adapter-utils@0.1.0': {}
 
   '@types/node@22.19.19':
     dependencies:

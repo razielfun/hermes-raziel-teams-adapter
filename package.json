@@ -1,6 +1,6 @@
 {
   "name": "hermes-raziel-teams-adapter",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "description": "RazielTeams adapter for Hermes Agent — run Hermes as a managed employee in a RazielTeams company",
   "type": "module",
   "license": "MIT",
@@ -45,7 +45,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@raziel-teams/adapter-utils": "file:../raziel-teams/packages/adapter-utils",
+    "@raziel-teams/adapter-utils": "^0.1.0",
     "picocolors": "^1.1.0"
   },
   "devDependencies": {
